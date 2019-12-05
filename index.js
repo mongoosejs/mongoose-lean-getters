@@ -4,6 +4,8 @@ const mpath = require('mpath');
 
 module.exports = function mongooseLeanGetters(schema) {
   const fn = applyGettersMiddleware(schema);
+  // Use `pre('find')` so this also works with `cursor()`
+  // and `eachAsync()`, because those do not call `post('find')`
   schema.pre('find', function() {
     if (typeof this.map === 'function') {
       this.map((res) => {
@@ -18,7 +20,6 @@ module.exports = function mongooseLeanGetters(schema) {
     }
   });
 
-  schema.post('find', fn);
   schema.post('findOne', fn);
   schema.post('findOneAndUpdate', fn);
 };
