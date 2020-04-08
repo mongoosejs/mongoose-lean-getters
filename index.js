@@ -77,6 +77,7 @@ function applyGettersToDoc(schema, doc) {
   });
 
   // Handle getters on virtual fields
+  const virtualKeys = Object.keys(schema.virtuals);
   for (let i = 0; i < virtualKeys.length; ++i) {
     const virtualPath = virtualKeys[i];
     const virtualType = schema.virtuals[virtualPath];
