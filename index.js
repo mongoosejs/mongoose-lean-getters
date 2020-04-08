@@ -75,4 +75,11 @@ function applyGettersToDoc(schema, doc) {
   schema.eachPath((path, schematype) => {
     mpath.set(path, schematype.applyGetters(mpath.get(path, doc), doc, true), doc);
   });
+
+  // Handle getters on virtual fields
+  for (let i = 0; i < virtualKeys.length; ++i) {
+    const virtualPath = virtualKeys[i];
+    const virtualType = schema.virtuals[virtualPath];
+    mpath.set(virtualPath, virtualType.applyGetters(mpath.get(virtualPath, doc), doc, true), doc);
+  }
 }

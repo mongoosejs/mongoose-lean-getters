@@ -1,4 +1,4 @@
-  
+
 'use strict';
 
 const assert = require('assert');
@@ -62,5 +62,30 @@ describe('mongoose-lean-getters', function() {
     const docs = await Model.find().lean({ getters: true });
 
     assert.equal(docs[0].name, 'test123');
+  });
+
+  it('calls getters on virtual populate fields', async function() {
+    const schema = mongoose.Schema({
+      name: {
+        type: String,
+        get: v => v + '123'
+      }
+    });
+    const virtual = schema.virtual('virt', {
+      ref: 'VirtualPopulate',
+      localField: '_id',
+      foreignField: 'name',
+    });
+    virtual.getters.unshift(function() { return 5; });
+    schema.plugin(mongooseLeanGetters);
+
+    const Model = mongoose.model('VirtualPopulate', schema);
+
+    await Model.deleteMany({});
+    await Model.create({ name: 'test' });
+
+    const docs = await Model.find().lean({ getters: true });
+
+    assert.equal(docs[0].virt, 5);
   });
 });
