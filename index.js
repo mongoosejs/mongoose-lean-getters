@@ -81,8 +81,6 @@ function applyGettersToDoc(schema, doc) {
   for (let i = 0; i < virtualKeys.length; ++i) {
     const virtualPath = virtualKeys[i];
     const virtualType = schema.virtuals[virtualPath];
-    if (virtualType.getters.length > 1) {
-      mpath.set(virtualPath, virtualType.applyGetters(mpath.get(virtualPath, doc), doc, true), doc);
-    }
+    mpath.set(virtualPath, virtualType.applyGetters(mpath.get(virtualPath, doc), doc, true), doc);
   }
 }
