@@ -1,6 +1,6 @@
 {
   "name": "mongoose-lean-getters",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Apply getters to the results of mongoose queries when using `.lean()`",
   "main": "index.js",
   "scripts": {

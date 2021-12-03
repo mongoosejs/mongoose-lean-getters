@@ -1,3 +1,7 @@
+0.2.2 / 2021-12-02
+==================
+ * fix: fix compiling with strict tsconfig #7 [Maks-s](https://github.com/Maks-s)
+
 0.2.1 / 2021-09-22
 ==================
  * fix: upgrade to latest mpath #5
