@@ -34,10 +34,10 @@
     "eslint": "5.16.0",
     "istanbul": "0.4.5",
     "mocha": "5.2.x",
-    "mongoose": ">= 5.11.0"
+    "mongoose": "6.x"
   },
   "peerDependencies": {
-    "mongoose": ">= 5.11.0"
+    "mongoose": ">= 5.11.0 | 6.x"
   },
   "author": "Valeri Karpov <val@karpov.io>",
   "license": "Apache 2.0",
