@@ -1,3 +1,7 @@
+0.3.0 / 2021-12-20
+==================
+ * feat: add Mongoose 6 to supported versions #8 [medolino](https://github.com/medolino)
+
 0.2.2 / 2021-12-02
 ==================
  * fix: fix compiling with strict tsconfig #7 [Maks-s](https://github.com/Maks-s)
