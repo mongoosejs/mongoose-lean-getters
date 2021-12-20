@@ -12,6 +12,11 @@ module.exports = function mongooseLeanGetters(schema) {
         fn.call(this, res);
         return res;
       });
+    } else if (typeof this.transform === 'function') {
+      this.transform((res) => {
+        fn.call(this, res);
+        return res;
+      });
     } else {
       this.options.transform = (res) => {
         fn.call(this, res);
