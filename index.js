@@ -1,6 +1,7 @@
 'use strict';
 
 const mpath = require('mpath');
+const isPathExcluded = require('./helpers/isPathExcluded');
 
 module.exports = function mongooseLeanGetters(schema) {
   const fn = applyGettersMiddleware(schema);
@@ -40,7 +41,7 @@ function applyGetters(schema, res) {
     return;
   }
 
-  if (this._mongooseOptions.lean && this._mongooseOptions.lean.getters) {
+  if (this._mongooseOptions.lean && this._mongooseOptions.lean.getters && !isPathExcluded(this, this._fields)) {
     if (Array.isArray(res)) {
       const len = res.length;
       for (let i = 0; i < len; ++i) {
