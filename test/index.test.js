@@ -63,4 +63,27 @@ describe('mongoose-lean-getters', function() {
 
     assert.equal(docs[0].name, 'test123');
   });
+  it('avoids running getters on fields that are projected out (gh-9)', async function() {
+    const schema = mongoose.Schema({
+      name: {
+        type: String,
+        get: v => v + '123'
+      },
+      age: {
+        type: String,
+        get: v => v + '333'
+      }
+    });
+    schema.plugin(mongooseLeanGetters);
+
+    const Model = mongoose.model('gh9', schema);
+
+    await Model.deleteMany({});
+    await Model.create({ name: 'test', age: '12' });
+
+    const docs = await Model.find({}, '-name').lean({ getters: true });
+
+    assert.equal(docs[0].name, undefined);
+    assert.equal(docs[0].age, '12333');
+  })
 });
