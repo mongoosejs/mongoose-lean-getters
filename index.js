@@ -81,3 +81,5 @@ function applyGettersToDoc(schema, doc) {
     mpath.set(path, schematype.applyGetters(mpath.get(path, doc), doc, true), doc);
   });
 }
+
+module.exports.default = module.exports;
