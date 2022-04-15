@@ -1,7 +1,7 @@
 'use strict';
 
 const mpath = require('mpath');
-const isPathExcluded = require('./helpers/isPathExcluded');
+const isPathExcluded = require('mongoose/lib/helpers/projection/isPathExcluded');
 
 module.exports = function mongooseLeanGetters(schema) {
   const fn = applyGettersMiddleware(schema);
