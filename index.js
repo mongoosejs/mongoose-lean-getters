@@ -1,7 +1,6 @@
 'use strict';
 
 const mpath = require('mpath');
-const isPathExcluded = require('mongoose/lib/helpers/projection/isPathExcluded');
 
 module.exports = function mongooseLeanGetters(schema) {
   const fn = applyGettersMiddleware(schema);
@@ -44,10 +43,10 @@ function applyGetters(schema, res) {
     if (Array.isArray(res)) {
       const len = res.length;
       for (let i = 0; i < len; ++i) {
-          applyGettersToDoc(schema, res[i], this._fields);
+        applyGettersToDoc.call(this, schema, res[i], this._fields);
       }
     } else {
-        applyGettersToDoc(schema, res, this._fields);
+      applyGettersToDoc.call(this, schema, res, this._fields);
     }
 
     for (let i = 0; i < schema.childSchemas.length; ++i) {
@@ -77,8 +76,12 @@ function applyGettersToDoc(schema, doc, fields) {
     return;
   }
   schema.eachPath((path, schematype) => {
-    if(!isPathExcluded(fields, path)) {
-      mpath.set(path, schematype.applyGetters(mpath.get(path, doc), doc, true), doc);
+    if (this.selectedInclusively() && fields[path] == null) {
+      return;
     }
+    if (this.selectedExclusively() && fields[path] != null) {
+      return;
+    }
+    mpath.set(path, schematype.applyGetters(mpath.get(path, doc), doc, true), doc);
   });
 }
