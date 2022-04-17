@@ -39,15 +39,14 @@ function applyGetters(schema, res) {
   if (res == null) {
     return;
   }
-
   if (this._mongooseOptions.lean && this._mongooseOptions.lean.getters) {
     if (Array.isArray(res)) {
       const len = res.length;
       for (let i = 0; i < len; ++i) {
-        applyGettersToDoc(schema, res[i]);
+        applyGettersToDoc.call(this, schema, res[i], this._fields);
       }
     } else {
-      applyGettersToDoc(schema, res);
+      applyGettersToDoc.call(this, schema, res, this._fields);
     }
 
     for (let i = 0; i < schema.childSchemas.length; ++i) {
@@ -66,7 +65,7 @@ function applyGetters(schema, res) {
   }
 }
 
-function applyGettersToDoc(schema, doc) {
+function applyGettersToDoc(schema, doc, fields) {
   if (doc == null) {
     return;
   }
@@ -76,8 +75,13 @@ function applyGettersToDoc(schema, doc) {
     }
     return;
   }
-
   schema.eachPath((path, schematype) => {
+    if (this.selectedInclusively() && fields[path] == null) {
+      return;
+    }
+    if (this.selectedExclusively() && fields[path] != null) {
+      return;
+    }
     mpath.set(path, schematype.applyGetters(mpath.get(path, doc), doc, true), doc);
   });
 }
