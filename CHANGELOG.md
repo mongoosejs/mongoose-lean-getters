@@ -1,3 +1,7 @@
+0.3.1 / 2022-04-17
+==================
+ * fix: avoid running getters on fields that are excluded by projection #9 [IslandRhythms](https://github.com/IslandRhythms)
+
 0.3.0 / 2021-12-20
 ==================
  * feat: add Mongoose 6 to supported versions #8 [medolino](https://github.com/medolino)
