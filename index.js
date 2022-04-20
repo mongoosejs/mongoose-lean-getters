@@ -35,7 +35,7 @@ function applyGettersMiddleware(schema) {
   };
 }
 
-function applyGetters(schema, res) {
+function applyGetters(schema, res, path) {
   if (res == null) {
     return;
   }
@@ -43,20 +43,20 @@ function applyGetters(schema, res) {
     if (Array.isArray(res)) {
       const len = res.length;
       for (let i = 0; i < len; ++i) {
-        applyGettersToDoc.call(this, schema, res[i], this._fields);
+        applyGettersToDoc.call(this, schema, res[i], this._fields, path);
       }
     } else {
-      applyGettersToDoc.call(this, schema, res, this._fields);
+      applyGettersToDoc.call(this, schema, res, this._fields, path);
     }
 
     for (let i = 0; i < schema.childSchemas.length; ++i) {
-      const _path = schema.childSchemas[i].model.path;
+      const childPath = path ? path + '.' + schema.childSchemas[i].model.path : schema.childSchemas[i].model.path;
       const _schema = schema.childSchemas[i].schema;
-      const _doc = mpath.get(_path, res);
-      if (_doc == null) {
+      const doc = mpath.get(childPath, res);
+      if (doc == null) {
         continue;
       }
-      applyGetters.call(this, _schema, _doc);
+      applyGetters.call(this, _schema, doc, childPath);
     }
 
     return res;
@@ -65,21 +65,22 @@ function applyGetters(schema, res) {
   }
 }
 
-function applyGettersToDoc(schema, doc, fields) {
+function applyGettersToDoc(schema, doc, fields, prefix) {
   if (doc == null) {
     return;
   }
   if (Array.isArray(doc)) {
     for (let i = 0; i < doc.length; ++i) {
-      applyGettersToDoc(schema, doc[i]);
+      applyGettersToDoc.call(this, schema, doc[i], fields, prefix);
     }
     return;
   }
   schema.eachPath((path, schematype) => {
-    if (this.selectedInclusively() && fields[path] == null) {
+    const pathWithPrefix = prefix ? prefix + '.' + path : path;
+    if (this.selectedInclusively() && fields && fields[pathWithPrefix] == null) {
       return;
     }
-    if (this.selectedExclusively() && fields[path] != null) {
+    if (this.selectedExclusively() && fields && fields[pathWithPrefix] != null) {
       return;
     }
     mpath.set(path, schematype.applyGetters(mpath.get(path, doc), doc, true), doc);

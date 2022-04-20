@@ -1,4 +1,4 @@
-  
+
 'use strict';
 
 const assert = require('assert');
@@ -64,6 +64,13 @@ describe('mongoose-lean-getters', function() {
     assert.equal(docs[0].name, 'test123');
   });
   it('avoids running getters on fields that are projected out (gh-9)', async function() {
+    const childSchema = mongoose.Schema({
+      name: {
+        type: String,
+        get: v => v + '456'
+      }
+    });
+
     const schema = mongoose.Schema({
       name: {
         type: String,
@@ -72,18 +79,20 @@ describe('mongoose-lean-getters', function() {
       age: {
         type: String,
         get: v => v + '333'
-      }
+      },
+      docArr: [childSchema]
     });
     schema.plugin(mongooseLeanGetters);
 
     const Model = mongoose.model('gh9', schema);
 
     await Model.deleteMany({});
-    await Model.create({ name: 'test', age: '12' });
+    await Model.create({ name: 'test', age: '12', docArr: [{ name: 'foo' }] });
 
     const docs = await Model.find({}, '-name').lean({ getters: true });
 
     assert.equal(docs[0].name, undefined);
     assert.equal(docs[0].age, '12333');
-  })
+    assert.equal(docs[0].docArr[0].name, 'foo456');
+  });
 });
