@@ -85,3 +85,6 @@ function applyGettersToDoc(schema, doc, fields) {
     mpath.set(path, schematype.applyGetters(mpath.get(path, doc), doc, true), doc);
   });
 }
+
+module.exports.default = module.exports;
+module.exports.mongooseLeanGetters = module.exports;
