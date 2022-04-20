@@ -1,3 +1,8 @@
+0.3.2 / 2022-04-20
+==================
+ * fix: correctly handle projections with document arrays #13
+ * fix: export default for ESM imports #11 [IslandRhythms](https://github.com/IslandRhythms)
+
 0.3.1 / 2022-04-17
 ==================
  * fix: avoid running getters on fields that are excluded by projection #9 [IslandRhythms](https://github.com/IslandRhythms)
