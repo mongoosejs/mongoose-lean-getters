@@ -83,3 +83,4 @@ function applyGettersToDoc(schema, doc) {
 }
 
 module.exports.default = module.exports;
+module.exports.mongooseLeanGetters = module.exports;
