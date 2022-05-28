@@ -1,3 +1,7 @@
+0.3.3 / 2022-05-28
+==================
+ * fix(types): remove unnecessary empty index.ts file #14 #15
+
 0.3.2 / 2022-04-20
 ==================
  * fix: correctly handle projections with document arrays #13
