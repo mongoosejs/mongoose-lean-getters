@@ -95,4 +95,54 @@ describe('mongoose-lean-getters', function() {
     assert.equal(docs[0].age, '12333');
     assert.equal(docs[0].docArr[0].name, 'foo456');
   });
+
+  it('should call nested getters', async function () {
+    const subChildSchema = mongoose.Schema({
+      name: {
+        type: String,
+        get: v => v + ' nested child'
+      }
+    });
+
+    const childSchema = mongoose.Schema({
+      name: {
+        type: String,
+        get: v => v + ' child'
+      },
+      subChilren: [subChildSchema]
+    });
+
+    const schema = mongoose.Schema({
+      name: {
+        type: String,
+        get: v => v + ' root'
+      },
+      children: [childSchema]
+    });
+    schema.plugin(mongooseLeanGetters);
+
+    const Model = mongoose.model('nestedChildren', schema);
+
+    await Model.deleteMany({});
+    await Model.create({
+      name: `I'm a`, children: [{
+        name: `Hello, I'm a`,
+        subChilren: [
+          {
+            name: 'The first'
+          },
+          {
+            name: 'The second'
+          }
+        ]
+      }]
+    });
+
+    const docs = await Model.find().lean({ getters: true });
+
+    assert.equal(docs[0].name, `I'm a root`);
+    assert.equal(docs[0].children[0].name, `Hello, I'm a child`);
+    assert.equal(docs[0].children[0].subChilren[0].name, 'The first nested child');
+    assert.equal(docs[0].children[0].subChilren[1].name, 'The second nested child');
+  });
 });
