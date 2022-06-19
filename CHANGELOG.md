@@ -1,3 +1,7 @@
+0.3.4 / 2022-06-19
+==================
+ * fix: call nested getters if nesting level > 1 #17 [vladomnifi](https://github.com/vladomnifi)
+
 0.3.3 / 2022-05-28
 ==================
  * fix(types): remove unnecessary empty index.ts file #14 #15
