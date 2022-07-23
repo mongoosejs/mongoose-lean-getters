@@ -1,3 +1,7 @@
+0.3.5 / 2022-07-22
+==================
+ * fix: correct semver range #19 [DesignByOnyx](https://github.com/DesignByOnyx)
+
 0.3.4 / 2022-06-19
 ==================
  * fix: call nested getters if nesting level > 1 #17 [vladomnifi](https://github.com/vladomnifi)
