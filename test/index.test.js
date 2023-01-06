@@ -145,4 +145,29 @@ describe('mongoose-lean-getters', function() {
     assert.equal(docs[0].children[0].subChilren[0].name, 'The first nested child');
     assert.equal(docs[0].children[0].subChilren[1].name, 'The second nested child');
   });
+  it('should not add path to output if the path has not getters gh-20', async function() {
+    const testSchema = new mongoose.Schema({
+      firstName: {
+        type: String,
+        get: capitalize
+      },
+      email: String
+    });
+
+    function capitalize() {
+      return 'Test';
+    }
+
+    testSchema.plugin(mongooseLeanGetters);
+
+    const Test = mongoose.model('gh-20', testSchema);
+    await Test.deleteMany({});
+    await Test.create({
+      firstName: 'test'
+    });
+    const res = await Test.findOne().lean({ getters: true });
+    const otherRes = await Test.findOne().lean();
+    const paths = Object.keys(res);
+    assert.equal(paths.includes('email'), false);
+  });
 });
