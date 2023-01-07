@@ -1,3 +1,7 @@
+0.3.6 / 2023-01-06
+==================
+ * fix: omit paths with no getters set #21 [IslandRhythms](https://github.com/IslandRhythms)
+
 0.3.5 / 2022-07-22
 ==================
  * fix: correct semver range #19 [DesignByOnyx](https://github.com/DesignByOnyx)
