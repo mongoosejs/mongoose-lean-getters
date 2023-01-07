@@ -83,7 +83,9 @@ function applyGettersToDoc(schema, doc, fields, prefix) {
     if (this.selectedExclusively() && fields && fields[pathWithPrefix] != null) {
       return;
     }
-    mpath.set(path, schematype.applyGetters(mpath.get(path, doc), doc, true), doc);
+    if (mpath.has(path, doc)) {
+      mpath.set(path, schematype.applyGetters(mpath.get(path, doc), doc, true), doc);
+    }
   });
 }
 
