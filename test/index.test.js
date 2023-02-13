@@ -170,4 +170,23 @@ describe('mongoose-lean-getters', function() {
     const paths = Object.keys(res);
     assert.equal(paths.includes('email'), false);
   });
+  it('should work with findByIdAndDelete gh-23', async function() {
+    const testSchema = new mongoose.Schema({
+      field: Number
+    });
+    testSchema.plugin(mongooseLeanGetters);
+
+    testSchema.path('field').get(function(field) {
+      return field.toString();
+    });
+    const Test = mongoose.model('gh-23', testSchema);
+
+    await Test.deleteMany({});
+    const entry = await Test.create({
+      field: 1337
+    });
+    const doc = await Test.findByIdAndDelete({ _id: entry._id }).lean({ getters: true });
+    assert.equal(typeof doc.field, 'string');
+    assert.equal(doc.field, '1337');
+  });
 });
