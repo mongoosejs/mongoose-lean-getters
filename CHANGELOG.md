@@ -1,3 +1,7 @@
+0.4.0 / 2023-02-13
+==================
+ * fix: support findOneAndDelete #24 #23 [IslandRhythms](https://github.com/IslandRhythms)
+
 0.3.6 / 2023-01-06
 ==================
  * fix: omit paths with no getters set #21 [IslandRhythms](https://github.com/IslandRhythms)
