@@ -78,7 +78,9 @@ function applyGettersToDoc(schema, doc, fields, prefix) {
   }
   schema.eachPath((path, schematype) => {
     const pathWithPrefix = prefix ? prefix + '.' + path : path;
-    if (this.selectedInclusively() && fields && fields[pathWithPrefix] == null) {
+    console.log('what are the following values', 'fields', fields, 'pathWithPrefix', pathWithPrefix, 'this.selectedExclusively', this.selectedExclusively(), 'this.selectedInclusively', this.selectedInclusively());
+    console.log('what is fields[pathWithPrefix]', fields[pathWithPrefix]);
+    if (this.selectedInclusively() && fields && fields[pathWithPrefix] == null) { // fields[pathWithPrefix] should return false
       return;
     }
     if (this.selectedExclusively() && fields && fields[pathWithPrefix] != null) {
