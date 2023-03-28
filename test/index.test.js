@@ -201,12 +201,12 @@ describe('mongoose-lean-getters', function() {
 
     schema.plugin(mongooseLeanGetters);
 
-    const Test = mongoose.model('Test', schema);
+    const Test = mongoose.model('gh-22', schema);
 
     await Test.create({
       name: 'Captain Jean-Luc Picard'
     });
-    console.log('does not work');
+
     const res = await Test.findOneAndUpdate({
       name: 'Captain Jean-Luc Picard'
     }, {
@@ -216,11 +216,11 @@ describe('mongoose-lean-getters', function() {
         }
       }
     }, { new: true, projection: 'name items'}).lean({ getters: true });
-    console.log('does work');
+
     const success = await Test.findOneAndUpdate({
       name: 'Captain Jean-Luc Picard'
     }).lean({ getters: true });
-    console.log('success', success);
+
     await Test.deleteMany({});
     assert.equal(res.items[0].text, 't amet');
   });

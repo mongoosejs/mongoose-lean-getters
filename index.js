@@ -1,6 +1,7 @@
 'use strict';
 
 const mpath = require('mpath');
+const isPathSelectedInclusive = require('mongoose/lib/helpers/projection/isPathSelectedInclusive');
 
 module.exports = function mongooseLeanGetters(schema) {
   const fn = applyGettersMiddleware(schema);
@@ -78,12 +79,10 @@ function applyGettersToDoc(schema, doc, fields, prefix) {
   }
   schema.eachPath((path, schematype) => {
     const pathWithPrefix = prefix ? prefix + '.' + path : path;
-    console.log('what are the following values', 'fields', fields, 'pathWithPrefix', pathWithPrefix, 'this.selectedExclusively', this.selectedExclusively(), 'this.selectedInclusively', this.selectedInclusively());
-    console.log('what is fields[pathWithPrefix]', fields[pathWithPrefix]);
-    if (this.selectedInclusively() && fields && fields[pathWithPrefix] == null) { // fields[pathWithPrefix] should return false
+    if (this.selectedInclusively() && fields && fields[pathWithPrefix] == null && !isPathSelectedInclusive(fields, pathWithPrefix)) { // fields[pathWithPrefix] should return false
       return;
     }
-    if (this.selectedExclusively() && fields && fields[pathWithPrefix] != null) {
+    if (this.selectedExclusively() && fields && fields[pathWithPrefix] != null && !isPathSelectedInclusive(fields, pathWithPrefix)) {
       return;
     }
     if (mpath.has(path, doc)) {
