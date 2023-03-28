@@ -222,6 +222,7 @@ describe('mongoose-lean-getters', function() {
     }).lean({ getters: true });
 
     await Test.deleteMany({});
+    assert.equal(success.items[0].text, 't amet')
     assert.equal(res.items[0].text, 't amet');
   });
 });
