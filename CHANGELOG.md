@@ -1,3 +1,8 @@
+1.0.0 / 2023-04-27
+==================
+ * BREAKING CHANGE: require Mongoose >= 7.1
+ * fix: avoid calling getters on excluded paths in arrays #22 [IslandRhythms](https://github.com/IslandRhythms)
+
 0.4.0 / 2023-02-13
 ==================
  * fix: support findOneAndDelete #24 #23 [IslandRhythms](https://github.com/IslandRhythms)
