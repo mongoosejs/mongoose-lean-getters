@@ -78,10 +78,16 @@ function applyGettersToDoc(schema, doc, fields, prefix) {
   }
   schema.eachPath((path, schematype) => {
     const pathWithPrefix = prefix ? prefix + '.' + path : path;
-    if (this.selectedInclusively() && fields && fields[pathWithPrefix] == null) {
+    if (this.selectedInclusively() &&
+        fields &&
+        fields[pathWithPrefix] == null &&
+        !this.isPathSelectedInclusive(pathWithPrefix)) { // fields[pathWithPrefix] should return false
       return;
     }
-    if (this.selectedExclusively() && fields && fields[pathWithPrefix] != null) {
+    if (this.selectedExclusively() &&
+        fields &&
+        fields[pathWithPrefix] != null &&
+        !this.isPathSelectedInclusive(pathWithPrefix)) {
       return;
     }
     if (mpath.has(path, doc)) {

@@ -21,10 +21,10 @@
     "mongodb"
   ],
   "dependencies": {
-    "mpath": "0.8.x"
+    "mpath": "0.9.x"
   },
   "engines": {
-    "node": ">= 8"
+    "node": ">= 14"
   },
   "devDependencies": {
     "acquit": "1.x",
@@ -34,10 +34,10 @@
     "eslint": "5.16.0",
     "istanbul": "0.4.5",
     "mocha": "5.2.x",
-    "mongoose": "6.x"
+    "mongoose": ">= 7.1.0"
   },
   "peerDependencies": {
-    "mongoose": ">= 5.11.0 || 6.x"
+    "mongoose": ">= 7.1.0"
   },
   "author": "Valeri Karpov <val@karpov.io>",
   "license": "Apache 2.0",

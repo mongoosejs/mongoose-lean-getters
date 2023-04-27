@@ -96,7 +96,7 @@ describe('mongoose-lean-getters', function() {
     assert.equal(docs[0].docArr[0].name, 'foo456');
   });
 
-  it('should call nested getters', async function () {
+  it('should call nested getters', async function() {
     const subChildSchema = mongoose.Schema({
       name: {
         type: String,
@@ -125,8 +125,8 @@ describe('mongoose-lean-getters', function() {
 
     await Model.deleteMany({});
     await Model.create({
-      name: `I'm a`, children: [{
-        name: `Hello, I'm a`,
+      name: 'I\'m a', children: [{
+        name: 'Hello, I\'m a',
         subChilren: [
           {
             name: 'The first'
@@ -140,8 +140,8 @@ describe('mongoose-lean-getters', function() {
 
     const docs = await Model.find().lean({ getters: true });
 
-    assert.equal(docs[0].name, `I'm a root`);
-    assert.equal(docs[0].children[0].name, `Hello, I'm a child`);
+    assert.equal(docs[0].name, 'I\'m a root');
+    assert.equal(docs[0].children[0].name, 'Hello, I\'m a child');
     assert.equal(docs[0].children[0].subChilren[0].name, 'The first nested child');
     assert.equal(docs[0].children[0].subChilren[1].name, 'The second nested child');
   });
@@ -188,5 +188,41 @@ describe('mongoose-lean-getters', function() {
     const doc = await Test.findByIdAndDelete({ _id: entry._id }).lean({ getters: true });
     assert.equal(typeof doc.field, 'string');
     assert.equal(doc.field, '1337');
+  });
+  it('should work with arrays gh-22', async function() {
+    const schema = mongoose.Schema({
+      name: {
+        type: String
+      },
+      items: [{
+        text: { type: String, default: null, get: v => v.slice(-6) }
+      }]
+    });
+
+    schema.plugin(mongooseLeanGetters);
+
+    const Test = mongoose.model('gh-22', schema);
+
+    await Test.create({
+      name: 'Captain Jean-Luc Picard'
+    });
+
+    const res = await Test.findOneAndUpdate({
+      name: 'Captain Jean-Luc Picard'
+    }, {
+      $push: {
+        items: {
+          text: 'Lorem ipsum dolor sit amet'
+        }
+      }
+    }, { new: true, projection: 'name items'}).lean({ getters: true });
+
+    const success = await Test.findOneAndUpdate({
+      name: 'Captain Jean-Luc Picard'
+    }).lean({ getters: true });
+
+    await Test.deleteMany({});
+    assert.equal(success.items[0].text, 't amet')
+    assert.equal(res.items[0].text, 't amet');
   });
 });
