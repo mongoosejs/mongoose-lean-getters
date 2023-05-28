@@ -63,6 +63,7 @@ describe('mongoose-lean-getters', function() {
 
     assert.equal(docs[0].name, 'test123');
   });
+
   it('avoids running getters on fields that are projected out (gh-9)', async function() {
     const childSchema = mongoose.Schema({
       name: {
@@ -145,6 +146,7 @@ describe('mongoose-lean-getters', function() {
     assert.equal(docs[0].children[0].subChilren[0].name, 'The first nested child');
     assert.equal(docs[0].children[0].subChilren[1].name, 'The second nested child');
   });
+
   it('should not add path to output if the path has not getters gh-20', async function() {
     const testSchema = new mongoose.Schema({
       firstName: {
@@ -166,10 +168,10 @@ describe('mongoose-lean-getters', function() {
       firstName: 'test'
     });
     const res = await Test.findOne().lean({ getters: true });
-    const otherRes = await Test.findOne().lean();
     const paths = Object.keys(res);
     assert.equal(paths.includes('email'), false);
   });
+
   it('should work with findByIdAndDelete gh-23', async function() {
     const testSchema = new mongoose.Schema({
       field: Number
@@ -189,6 +191,7 @@ describe('mongoose-lean-getters', function() {
     assert.equal(typeof doc.field, 'string');
     assert.equal(doc.field, '1337');
   });
+
   it('should work with arrays gh-22', async function() {
     const schema = mongoose.Schema({
       name: {
@@ -222,7 +225,28 @@ describe('mongoose-lean-getters', function() {
     }).lean({ getters: true });
 
     await Test.deleteMany({});
-    assert.equal(success.items[0].text, 't amet')
+    assert.equal(success.items[0].text, 't amet');
     assert.equal(res.items[0].text, 't amet');
+  });
+
+  it('should call nested getters on schemas with discriminator', async function() {
+    const options = { discriminatorKey: 'kind' };
+
+    const eventSchema = new mongoose.Schema({ time: Date }, options);
+    eventSchema.plugin(mongooseLeanGetters);
+    const Event = mongoose.model('Event', eventSchema);
+
+    const ClickedLinkEvent = Event.discriminator('ClickedLink', new mongoose.Schema({
+      url: { type: String, get: v => v + ' discriminator field' }
+    }, options));
+
+    await ClickedLinkEvent.deleteMany({});
+    await ClickedLinkEvent.create({
+      url: 'https://www.test.com'
+    });
+
+    const docs = await ClickedLinkEvent.find().lean({ getters: true });
+
+    assert.equal(docs[0].url, 'https://www.test.com discriminator field');
   });
 });
