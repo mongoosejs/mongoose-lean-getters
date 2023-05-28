@@ -229,7 +229,7 @@ describe('mongoose-lean-getters', function() {
     assert.equal(res.items[0].text, 't amet');
   });
 
-  it('should call nested getters on schemas with discriminator', async function() {
+  it('should call getters on schemas with discriminator', async function() {
     const options = { discriminatorKey: 'kind' };
 
     const eventSchema = new mongoose.Schema({ time: Date }, options);
