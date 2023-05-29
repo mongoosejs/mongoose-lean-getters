@@ -36,16 +36,6 @@ function applyGettersMiddleware(schema) {
   };
 }
 
-function getSchemaForRes(schema, res) {
-  if (!schema.discriminatorMapping || !schema.discriminatorMapping.key) {
-    return schema;
-  }
-
-  const discriminatorValue = res[schema.discriminatorMapping.key];
-  const childSchema = schema.discriminators[discriminatorValue];
-  return childSchema;
-}
-
 function applyGetters(schema, res, path) {
   if (res == null) {
     return;
@@ -54,12 +44,10 @@ function applyGetters(schema, res, path) {
     if (Array.isArray(res)) {
       const len = res.length;
       for (let i = 0; i < len; ++i) {
-        const schemaForRes = getSchemaForRes(schema, res[i]);
-        applyGettersToDoc.call(this, schemaForRes, res[i], this._fields, path);
+        applyGettersToDoc.call(this, schema, res[i], this._fields, path);
       }
     } else {
-      const schemaForRes = getSchemaForRes(schema, res);
-      applyGettersToDoc.call(this, schemaForRes, res, this._fields, path);
+      applyGettersToDoc.call(this, schema, res, this._fields, path);
     }
 
     for (let i = 0; i < schema.childSchemas.length; ++i) {
@@ -78,17 +66,31 @@ function applyGetters(schema, res, path) {
   }
 }
 
+function getSchemaForDoc(schema, res) {
+  if (!schema.discriminatorMapping || !schema.discriminatorMapping.key) {
+    return schema;
+  }
+
+  const discriminatorValue = res[schema.discriminatorMapping.key];
+  const childSchema = schema.discriminators[discriminatorValue];
+  return childSchema;
+}
+
 function applyGettersToDoc(schema, doc, fields, prefix) {
   if (doc == null) {
     return;
   }
+
+  const schemaForDoc = getSchemaForDoc(schema, doc);
+
   if (Array.isArray(doc)) {
     for (let i = 0; i < doc.length; ++i) {
-      applyGettersToDoc.call(this, schema, doc[i], fields, prefix);
+      applyGettersToDoc.call(this, schemaForDoc, doc[i], fields, prefix);
     }
     return;
   }
-  schema.eachPath((path, schematype) => {
+
+  schemaForDoc.eachPath((path, schematype) => {
     const pathWithPrefix = prefix ? prefix + '.' + path : path;
     if (this.selectedInclusively() &&
         fields &&
