@@ -66,17 +66,31 @@ function applyGetters(schema, res, path) {
   }
 }
 
+function getSchemaForDoc(schema, res) {
+  if (!schema.discriminatorMapping || !schema.discriminatorMapping.key) {
+    return schema;
+  }
+
+  const discriminatorValue = res[schema.discriminatorMapping.key];
+  const childSchema = schema.discriminators[discriminatorValue];
+  return childSchema;
+}
+
 function applyGettersToDoc(schema, doc, fields, prefix) {
   if (doc == null) {
     return;
   }
+
+  const schemaForDoc = getSchemaForDoc(schema, doc);
+
   if (Array.isArray(doc)) {
     for (let i = 0; i < doc.length; ++i) {
-      applyGettersToDoc.call(this, schema, doc[i], fields, prefix);
+      applyGettersToDoc.call(this, schemaForDoc, doc[i], fields, prefix);
     }
     return;
   }
-  schema.eachPath((path, schematype) => {
+
+  schemaForDoc.eachPath((path, schematype) => {
     const pathWithPrefix = prefix ? prefix + '.' + path : path;
     if (this.selectedInclusively() &&
         fields &&
