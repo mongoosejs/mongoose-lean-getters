@@ -1,3 +1,7 @@
+1.1.0 / 2023-06-01
+==================
+ * feat: apply getters to schemas with discriminator #26 [remcorakers](https://github.com/remcorakers)
+
 1.0.0 / 2023-04-27
 ==================
  * BREAKING CHANGE: require Mongoose >= 7.1
