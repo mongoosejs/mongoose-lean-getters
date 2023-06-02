@@ -67,7 +67,7 @@ function applyGetters(schema, res, path) {
 }
 
 function getSchemaForDoc(schema, res) {
-  if (!schema.discriminatorMapping || !schema.discriminatorMapping.key) {
+  if (!schema.discriminatorMapping || !schema.discriminatorMapping.key || !schema.discriminators) {
     return schema;
   }
 
@@ -81,14 +81,17 @@ function applyGettersToDoc(schema, doc, fields, prefix) {
     return;
   }
 
-  const schemaForDoc = getSchemaForDoc(schema, doc);
-
   if (Array.isArray(doc)) {
     for (let i = 0; i < doc.length; ++i) {
-      applyGettersToDoc.call(this, schemaForDoc, doc[i], fields, prefix);
+      const currentDoc = doc[i];
+      if (currentDoc == null) continue;
+      const schemaForDoc = getSchemaForDoc(schema, currentDoc);
+      applyGettersToDoc.call(this, schemaForDoc, currentDoc, fields, prefix);
     }
     return;
   }
+
+  const schemaForDoc = getSchemaForDoc(schema, doc);
 
   schemaForDoc.eachPath((path, schematype) => {
     const pathWithPrefix = prefix ? prefix + '.' + path : path;

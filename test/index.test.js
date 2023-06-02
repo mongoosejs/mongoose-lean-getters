@@ -249,4 +249,32 @@ describe('mongoose-lean-getters', function() {
 
     assert.equal(docs[0].url, 'https://www.test.com discriminator field');
   });
+
+  it('should work on schemas with discriminators in arrays', async function() {
+    const options = { discriminatorKey: 'kind' };
+
+    const eventSchema = new mongoose.Schema({ time: Date }, options);
+    const clickedLinkSchema = new mongoose.Schema({
+      url: { type: String, get: v => v + ' discriminator field' }
+    });
+    eventSchema.discriminator('ClickedLink', clickedLinkSchema);
+
+    const eventListSchema = new mongoose.Schema({
+      events: [eventSchema],
+    });
+    eventListSchema.plugin(mongooseLeanGetters);
+    const EventList = mongoose.model('EventList', eventListSchema);
+
+    await EventList.deleteMany({});
+    await EventList.create({
+      events: [{
+        kind: 'ClickedLink',
+        url: 'https://www.test.com'
+      }],
+    });
+
+    const docs = await EventList.find().lean({ getters: true });
+
+    assert.equal(docs[0].events[0].url, 'https://www.test.com discriminator field');
+  });
 });
