@@ -249,4 +249,30 @@ describe('mongoose-lean-getters', function() {
 
     assert.equal(docs[0].url, 'https://www.test.com discriminator field');
   });
+  it('should call getters on schemas with discriminator using explicit value', async function() {
+    const options = { discriminatorKey: 'kind' };
+
+    const eventSchema = new mongoose.Schema({ time: Date }, options);
+    eventSchema.plugin(mongooseLeanGetters);
+    const Event = mongoose.model('Event2', eventSchema);
+
+    const ClickedLinkEvent = Event.discriminator('ClickedLink2',
+      new mongoose.Schema({
+        url: { type: String, get: v => v + ' discriminator field' }
+      }, options),
+      {
+        value: 'ExplicitClickedLink'
+      }
+    );
+
+    await ClickedLinkEvent.deleteMany({});
+    await ClickedLinkEvent.create({
+      url: 'https://www.test.com'
+    });
+
+    // Should not throw "Cannot read properties of undefined (reading 'eachPath')"
+    const docs = await ClickedLinkEvent.find().lean({ getters: true });
+
+    assert.equal(docs[0].url, 'https://www.test.com discriminator field');
+  });
 });
