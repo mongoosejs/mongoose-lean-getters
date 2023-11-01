@@ -7,7 +7,7 @@ const mongooseLeanGetters = require('../');
 
 describe('mongoose-lean-getters', function() {
   before(function() {
-    return mongoose.connect('mongodb://127.0.0.1:27017/test', { useNewUrlParser: true });
+    return mongoose.connect('mongodb://127.0.0.1:27017/test');
   });
 
   after(() => mongoose.disconnect());
