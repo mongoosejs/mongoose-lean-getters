@@ -249,4 +249,30 @@ describe('mongoose-lean-getters', function() {
 
     assert.equal(docs[0].url, 'https://www.test.com discriminator field');
   });
+
+  it('should call getters on arrays (gh-30)', async function() {
+    function upper(value) {
+      return value.toUpperCase();
+    }
+
+    const userSchema = new mongoose.Schema({
+      name: {
+        type: String,
+        get: upper
+      },
+      emails: [{ type: String, get: upper }]
+    });
+    userSchema.plugin(mongooseLeanGetters);
+    const User = mongoose.model('User', userSchema);
+
+    const user = new User({
+      name: 'one',
+      emails: ['two', 'three'],
+    });
+    await user.save();
+
+    const foundUser = await User.findById(user._id).lean({ getters: true });
+    assert.strictEqual(user.name, 'ONE');
+    assert.deepStrictEqual(foundUser.emails, ['TWO', 'THREE']);
+  });
 });
