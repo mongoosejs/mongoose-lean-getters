@@ -107,8 +107,20 @@ function applyGettersToDoc(schema, doc, fields, prefix) {
         !this.isPathSelectedInclusive(pathWithPrefix)) {
       return;
     }
-    if (mpath.has(path, doc)) {
-      mpath.set(path, schematype.applyGetters(mpath.get(path, doc), doc, true), doc);
+
+    const pathExists = mpath.has(path, doc);
+    if (pathExists) {
+      if (schematype.$isMongooseArray && !schematype.$isMongooseDocumentArray) {
+        mpath.set(
+          path,
+          schematype.applyGetters(mpath.get(path, doc), doc, true).map(subdoc => {
+            return schematype.caster.applyGetters(subdoc, doc);
+          }),
+          doc
+        );
+      } else {
+        mpath.set(path, schematype.applyGetters(mpath.get(path, doc), doc, true), doc);
+      }
     }
   });
 }

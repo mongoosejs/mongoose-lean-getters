@@ -1,6 +1,8 @@
 # mongoose-lean-getters
 Apply getters on lean() documents: https://mongoosejs.com/docs/tutorials/lean.html
 
+This package requires Mongoose `>= 7.1.0`. Do not use with Mongoose 7.0.x or 6.x.
+
 ## Usage
 
 ```javascript

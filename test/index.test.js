@@ -7,7 +7,7 @@ const mongooseLeanGetters = require('../');
 
 describe('mongoose-lean-getters', function() {
   before(function() {
-    return mongoose.connect('mongodb://127.0.0.1:27017/test', { useNewUrlParser: true });
+    return mongoose.connect('mongodb://127.0.0.1:27017/test');
   });
 
   after(() => mongoose.disconnect());
@@ -276,5 +276,31 @@ describe('mongoose-lean-getters', function() {
     const docs = await EventList.find().lean({ getters: true });
 
     assert.equal(docs[0].events[0].url, 'https://www.test.com discriminator field');
+  });
+    
+  it('should call getters on arrays (gh-30)', async function() {
+    function upper(value) {
+      return value.toUpperCase();
+    }
+
+    const userSchema = new mongoose.Schema({
+      name: {
+        type: String,
+        get: upper
+      },
+      emails: [{ type: String, get: upper }]
+    });
+    userSchema.plugin(mongooseLeanGetters);
+    const User = mongoose.model('User', userSchema);
+
+    const user = new User({
+      name: 'one',
+      emails: ['two', 'three'],
+    });
+    await user.save();
+
+    const foundUser = await User.findById(user._id).lean({ getters: true });
+    assert.strictEqual(user.name, 'ONE');
+    assert.deepStrictEqual(foundUser.emails, ['TWO', 'THREE']);
   });
 });

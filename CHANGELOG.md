@@ -1,3 +1,7 @@
+2.0.0 / 2024-03-07
+==================
+ * BREAKING CHANGE: call getters correctly on array elements for Mongoose 7.5.0, require Mongoose 7.5.0 #30
+
 1.1.0 / 2023-06-01
 ==================
  * feat: apply getters to schemas with discriminator #26 [remcorakers](https://github.com/remcorakers)
