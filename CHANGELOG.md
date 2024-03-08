@@ -1,3 +1,8 @@
+2.0.1 / 2024-03-08
+==================
+ * fix: handle discriminators with explicit tied values #31 [MarkParnwell](https://github.com/MarkParnwell)
+ * fix: correctly get schema for each element of a discriminated array #28 [nathan-knight](https://github.com/nathan-knight)
+
 2.0.0 / 2024-03-07
 ==================
  * BREAKING CHANGE: call getters correctly on array elements for Mongoose 7.5.0, require Mongoose 7.5.0 #30
