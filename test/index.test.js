@@ -7,7 +7,7 @@ const mongooseLeanGetters = require('../');
 
 describe('mongoose-lean-getters', function() {
   before(function() {
-    return mongoose.connect('mongodb://127.0.0.1:27017/test', { useNewUrlParser: true });
+    return mongoose.connect('mongodb://127.0.0.1:27017/test');
   });
 
   after(() => mongoose.disconnect());
@@ -249,6 +249,7 @@ describe('mongoose-lean-getters', function() {
 
     assert.equal(docs[0].url, 'https://www.test.com discriminator field');
   });
+  
   it('should call getters on schemas with discriminator using explicit value', async function() {
     const options = { discriminatorKey: 'kind' };
 
@@ -274,5 +275,59 @@ describe('mongoose-lean-getters', function() {
     const docs = await ClickedLinkEvent.find().lean({ getters: true });
 
     assert.equal(docs[0].url, 'https://www.test.com discriminator field');
+  });
+
+  it('should work on schemas with discriminators in arrays', async function() {
+    const options = { discriminatorKey: 'kind' };
+
+    const eventSchema = new mongoose.Schema({ time: Date }, options);
+    const clickedLinkSchema = new mongoose.Schema({
+      url: { type: String, get: v => v + ' discriminator field' }
+    });
+    eventSchema.discriminator('ClickedLink', clickedLinkSchema);
+
+    const eventListSchema = new mongoose.Schema({
+      events: [eventSchema],
+    });
+    eventListSchema.plugin(mongooseLeanGetters);
+    const EventList = mongoose.model('EventList', eventListSchema);
+
+    await EventList.deleteMany({});
+    await EventList.create({
+      events: [{
+        kind: 'ClickedLink',
+        url: 'https://www.test.com'
+      }],
+    });
+
+    const docs = await EventList.find().lean({ getters: true });
+
+    assert.equal(docs[0].events[0].url, 'https://www.test.com discriminator field');
+  });
+    
+  it('should call getters on arrays (gh-30)', async function() {
+    function upper(value) {
+      return value.toUpperCase();
+    }
+
+    const userSchema = new mongoose.Schema({
+      name: {
+        type: String,
+        get: upper
+      },
+      emails: [{ type: String, get: upper }]
+    });
+    userSchema.plugin(mongooseLeanGetters);
+    const User = mongoose.model('User', userSchema);
+
+    const user = new User({
+      name: 'one',
+      emails: ['two', 'three'],
+    });
+    await user.save();
+
+    const foundUser = await User.findById(user._id).lean({ getters: true });
+    assert.strictEqual(user.name, 'ONE');
+    assert.deepStrictEqual(foundUser.emails, ['TWO', 'THREE']);
   });
 });
