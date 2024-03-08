@@ -74,7 +74,7 @@ function getSchemaForDoc(schema, res) {
   const discriminatorValue = res[schema.discriminatorMapping.key];
   let childSchema = undefined;
   for (const name of Object.keys(schema.discriminators)) {
-    const matchValue = childSchema.discriminatorMapping.value || modelName;
+    const matchValue = schema.discriminators[name].discriminatorMapping.value || modelName;
     if (matchValue === discriminatorValue) {
       childSchema = schema.discriminators[name];
       break;
