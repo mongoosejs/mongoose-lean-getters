@@ -74,7 +74,7 @@ function getSchemaForDoc(schema, res) {
   const discriminatorValue = res[schema.discriminatorMapping.key];
   let childSchema = undefined;
   for (const name of Object.keys(schema.discriminators)) {
-    const matchValue = schema.discriminators[name].discriminatorMapping.value || modelName;
+    const matchValue = schema.discriminators[name].discriminatorMapping.value;
     if (matchValue === discriminatorValue) {
       childSchema = schema.discriminators[name];
       break;
@@ -91,7 +91,13 @@ function applyGettersToDoc(schema, doc, fields, prefix) {
   if (Array.isArray(doc)) {
     for (let i = 0; i < doc.length; ++i) {
       const currentDoc = doc[i];
+      // If the current doc is null/undefined, there's nothing to do
       if (currentDoc == null) continue;
+      // If it is a nested array, apply getters to each subdocument (otherwise it would attempt to apply getters to the array itself)
+      if (Array.isArray(currentDoc)) {
+        applyGettersToDoc.call(this, schema, currentDoc, fields, prefix);
+        continue;
+      }
       const schemaForDoc = getSchemaForDoc(schema, currentDoc);
       applyGettersToDoc.call(this, schemaForDoc, currentDoc, fields, prefix);
     }

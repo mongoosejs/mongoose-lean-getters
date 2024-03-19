@@ -249,7 +249,7 @@ describe('mongoose-lean-getters', function() {
 
     assert.equal(docs[0].url, 'https://www.test.com discriminator field');
   });
-  
+
   it('should call getters on schemas with discriminator using explicit value', async function() {
     const options = { discriminatorKey: 'kind' };
 
@@ -304,7 +304,41 @@ describe('mongoose-lean-getters', function() {
 
     assert.equal(docs[0].events[0].url, 'https://www.test.com discriminator field');
   });
-    
+
+  it('should work on schemas with discriminators in nested arrays', async function() {
+    const options = { discriminatorKey: 'kind' };
+
+    const eventSchema = new mongoose.Schema({ time: Date }, options);
+    const clickedLinkSchema = new mongoose.Schema({
+      url: { type: String, get: v => v + ' discriminator field' }
+    });
+    eventSchema.discriminator('VisitedPage', clickedLinkSchema);
+
+    const eventGroupSchema = new mongoose.Schema({
+      events: [eventSchema]
+    });
+
+    const eventListSchema = new mongoose.Schema({
+      eventGroups: [eventGroupSchema],
+    });
+    eventListSchema.plugin(mongooseLeanGetters);
+    const EventGroupList = mongoose.model('EventGroupList', eventListSchema);
+
+    await EventGroupList.deleteMany({});
+    await EventGroupList.create({
+      eventGroups: [{
+        events: [{
+          kind: 'VisitedPage',
+          url: 'https://www.test.com'
+        }],
+      }],
+    });
+
+    const docs = await EventGroupList.find().lean({ getters: true });
+
+    assert.equal(docs[0].eventGroups[0].events[0].url, 'https://www.test.com discriminator field');
+  });
+
   it('should call getters on arrays (gh-30)', async function() {
     function upper(value) {
       return value.toUpperCase();
