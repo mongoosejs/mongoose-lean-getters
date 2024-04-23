@@ -28,6 +28,7 @@ module.exports = function mongooseLeanGetters(schema) {
   schema.post('findOne', fn);
   schema.post('findOneAndUpdate', fn);
   schema.post('findOneAndDelete', fn);
+  schema.post('findOneAndReplace', fn);
 };
 
 function applyGettersMiddleware(schema) {
