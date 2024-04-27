@@ -1,3 +1,8 @@
+2.1.0 / 2024-04-27
+==================
+ * feat: add support for findOneAndReplace #34 [Ebulus7899](https://github.com/Ebulus7899)
+ * fix: handle discriminators in nested document arrays #32 [nathan-knight](https://github.com/nathan-knight)
+
 2.0.1 / 2024-03-08
 ==================
  * fix: handle discriminators with explicit tied values #31 [MarkParnwell](https://github.com/MarkParnwell)
