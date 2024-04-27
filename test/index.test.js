@@ -330,4 +330,24 @@ describe('mongoose-lean-getters', function() {
     assert.strictEqual(user.name, 'ONE');
     assert.deepStrictEqual(foundUser.emails, ['TWO', 'THREE']);
   });
+
+  it('should work with findOneAndReplace (gh-31)', async function() {
+    const testSchema = new mongoose.Schema({
+      field: Number,
+    });
+    testSchema.plugin(mongooseLeanGetters);
+
+    testSchema.path('field').get(function(field) {
+      return field.toString();
+    });
+    const Test = mongoose.model('gh-31', testSchema);
+
+    await Test.deleteMany({});
+    const entry = await Test.create({
+      field: 1337
+    });
+    const doc = await Test.findOneAndReplace({ _id: entry._id }, entry).lean({ getters: true });
+    assert.equal(typeof doc.field, 'string');
+    assert.strictEqual(doc.field, '1337');
+  });
 });
