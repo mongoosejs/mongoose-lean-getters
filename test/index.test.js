@@ -348,6 +348,6 @@ describe('mongoose-lean-getters', function() {
     });
     const doc = await Test.findOneAndReplace({ _id: entry._id }, entry).lean({ getters: true });
     assert.equal(typeof doc.field, 'string');
-    assert.equal(doc.field, '1337');
+    assert.strictEqual(doc.field, '1337');
   });
 });
