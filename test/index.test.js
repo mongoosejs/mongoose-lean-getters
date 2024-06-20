@@ -45,6 +45,22 @@ describe('mongoose-lean-getters', function() {
     assert.equal(doc.arr[0].test, 'baz');
   });
 
+  it('with nulled array', async function() {
+    const schema = mongoose.Schema({
+      arr: [String]
+    });
+    schema.plugin(mongooseLeanGetters);
+
+    const Model = mongoose.model('withNulledArray', schema);
+
+    await Model.deleteMany({});
+    await Model.create({ arr: null });
+
+    const doc = await Model.findOne().lean({ getters: true });
+
+    assert.equal(doc.arr, null);
+  });
+
   it('only calls getters once with find() (gh-1)', async function() {
     const schema = mongoose.Schema({
       name: {
