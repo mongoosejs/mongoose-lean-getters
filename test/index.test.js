@@ -385,7 +385,7 @@ describe('mongoose-lean-getters', function() {
     assert.strictEqual(doc.field, '1337');
   });
 
-  it('should should allow getters to transform return type', async function() {
+  it('should should allow array getters to return non-arrays', async function() {
     const userSchema = new mongoose.Schema({
       emails: {
         type: [String],
@@ -395,12 +395,14 @@ describe('mongoose-lean-getters', function() {
       }
     });
     userSchema.plugin(mongooseLeanGetters);
-    const User = mongoose.model('transform-arrays', userSchema);
+    const User = mongoose.model('gh-37-transform-arrays', userSchema);
 
     const variants = [
       { sourceVal: 'foo', expectedVal: 'foo' },
       { sourceVal: ['foo'], expectedVal: 'foo' },
       { sourceVal: ['foo', 'bar'], expectedVal: ['foo', 'bar'] },
+      { sourceVal: [], expectedVal: undefined },
+      { sourceVal: null, expectedVal: undefined },
       { sourceVal: undefined, expectedVal: undefined },
     ];
 
@@ -410,8 +412,9 @@ describe('mongoose-lean-getters', function() {
         await user.save();
 
         const foundUser = await User.findById(user._id).lean({ getters: true });
-        assert.deepStrictEqual(user.emails, expectedVal, `user did not have expected value { sourceVal: ${sourceVal}, expectedVal: ${expectedVal} }`);
-        assert.deepStrictEqual(foundUser.emails, expectedVal, `foundUser did not have expected value { sourceVal: ${sourceVal}, expectedVal: ${expectedVal}`);
+        const stringified = JSON.stringify({ sourceVal, expectedVal });
+        assert.deepStrictEqual(user.emails, expectedVal, `user did not have expected value ${stringified}`);
+        assert.deepStrictEqual(foundUser.emails, expectedVal, `foundUser did not have expected value ${stringified}`);
       })
     );
   });
