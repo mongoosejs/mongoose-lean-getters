@@ -125,11 +125,15 @@ function applyGettersToDoc(schema, doc, fields, prefix) {
     const pathExists = mpath.has(path, doc);
     if (pathExists) {
       if (schematype.$isMongooseArray && !schematype.$isMongooseDocumentArray) {
+        // A getter may return a non-array
+        const got = schematype.applyGetters(mpath.get(path, doc), doc, true);
+        const val = Array.isArray(got) ? got.map(subdoc => {
+          return schematype.caster.applyGetters(subdoc, doc);
+        }) : schematype.caster.applyGetters(got, doc);
+
         mpath.set(
           path,
-          schematype.applyGetters(mpath.get(path, doc), doc, true).map(subdoc => {
-            return schematype.caster.applyGetters(subdoc, doc);
-          }),
+          val,
           doc
         );
       } else {

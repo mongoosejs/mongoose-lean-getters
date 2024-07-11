@@ -384,4 +384,35 @@ describe('mongoose-lean-getters', function() {
     assert.equal(typeof doc.field, 'string');
     assert.strictEqual(doc.field, '1337');
   });
+
+  it('should should allow getters to transform return type', async function() {
+    const userSchema = new mongoose.Schema({
+      emails: {
+        type: [String],
+        // returns undefined, string, or array
+        get: (val) => !val || !val.length ? undefined : (val.length === 1 ? val[0] : val),
+        set: (val) => typeof val === 'string' ? [val] : val,
+      }
+    });
+    userSchema.plugin(mongooseLeanGetters);
+    const User = mongoose.model('transform-arrays', userSchema);
+
+    const variants = [
+      { sourceVal: 'foo', expectedVal: 'foo' },
+      { sourceVal: ['foo'], expectedVal: 'foo' },
+      { sourceVal: ['foo', 'bar'], expectedVal: ['foo', 'bar'] },
+      { sourceVal: undefined, expectedVal: undefined },
+    ];
+
+    await Promise.all(
+      variants.map(async({ sourceVal, expectedVal }) => {
+        const user = new User({ emails: sourceVal });
+        await user.save();
+
+        const foundUser = await User.findById(user._id).lean({ getters: true });
+        assert.deepStrictEqual(user.emails, expectedVal, `user did not have expected value { sourceVal: ${sourceVal}, expectedVal: ${expectedVal} }`);
+        assert.deepStrictEqual(foundUser.emails, expectedVal, `foundUser did not have expected value { sourceVal: ${sourceVal}, expectedVal: ${expectedVal}`);
+      })
+    );
+  });
 });
