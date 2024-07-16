@@ -81,7 +81,9 @@ function getSchemaForDoc(schema, res) {
       break;
     }
   }
-  return childSchema;
+
+  // If no discriminator schema found, return the root schema (#39)
+  return childSchema || schema;
 }
 
 function applyGettersToDoc(schema, doc, fields, prefix) {
