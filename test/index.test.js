@@ -395,7 +395,7 @@ describe('mongoose-lean-getters', function() {
     // Simply retrieving the non-discriminated document causes the error
     await assert.doesNotReject(async() => {
       const entry = await BaseModel.create({ foo: 'foo' });
-      await BaseModel.findById({ _id: entry._id }).lean({ getters: true });
+      await BaseModel.findById(entry._id).lean({ getters: true });
     });
   });
 });
