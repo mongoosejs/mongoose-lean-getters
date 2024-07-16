@@ -2,8 +2,8 @@
 
 const mpath = require('mpath');
 
-module.exports = function mongooseLeanGetters(schema) {
-  const fn = applyGettersMiddleware(schema);
+module.exports = function mongooseLeanGetters(schema, options) {
+  const fn = applyGettersMiddleware(schema, options);
   // Use `pre('find')` so this also works with `cursor()`
   // and `eachAsync()`, because those do not call `post('find')`
   schema.pre('find', function() {
@@ -31,8 +31,9 @@ module.exports = function mongooseLeanGetters(schema) {
   schema.post('findOneAndReplace', fn);
 };
 
-function applyGettersMiddleware(schema) {
+function applyGettersMiddleware(schema, options) {
   return function(res) {
+    this._mongooseLeanGettersOptions = options || {};
     applyGetters.call(this, schema, res);
   };
 }
@@ -41,7 +42,14 @@ function applyGetters(schema, res, path) {
   if (res == null) {
     return;
   }
-  if (this._mongooseOptions.lean && this._mongooseOptions.lean.getters) {
+  const { defaultLeanOptions } = this._mongooseLeanGettersOptions;
+  const shouldCallGetters = this._mongooseOptions.lean && (
+    this._mongooseOptions.lean.getters ||
+    // Allow the default options to be overridden with `.lean({ getters: false })`
+    (defaultLeanOptions && defaultLeanOptions.getters && this._mongooseOptions.lean.getters !== false)
+  );
+
+  if (shouldCallGetters) {
     if (Array.isArray(res)) {
       const len = res.length;
       for (let i = 0; i < len; ++i) {
