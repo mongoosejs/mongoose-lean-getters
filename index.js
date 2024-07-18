@@ -37,7 +37,7 @@ function applyGettersMiddleware(schema) {
   };
 }
 
-function applyGetters(schema, res, path) {
+function applyGetters(schema, res) {
   if (res == null) {
     return;
   }
@@ -45,22 +45,11 @@ function applyGetters(schema, res, path) {
     if (Array.isArray(res)) {
       const len = res.length;
       for (let i = 0; i < len; ++i) {
-        applyGettersToDoc.call(this, schema, res[i], this._fields, path);
+        applyGettersToDoc.call(this, schema, res[i]);
       }
     } else {
-      applyGettersToDoc.call(this, schema, res, this._fields, path);
+      applyGettersToDoc.call(this, schema, res);
     }
-
-    for (let i = 0; i < schema.childSchemas.length; ++i) {
-      const childPath = path ? path + '.' + schema.childSchemas[i].model.path : schema.childSchemas[i].model.path;
-      const _schema = schema.childSchemas[i].schema;
-      const doc = mpath.get(schema.childSchemas[i].model.path, res);
-      if (doc == null) {
-        continue;
-      }
-      applyGetters.call(this, _schema, doc, childPath);
-    }
-
     return res;
   } else {
     return res;
@@ -84,7 +73,7 @@ function getSchemaForDoc(schema, res) {
   return childSchema;
 }
 
-function applyGettersToDoc(schema, doc, fields, prefix) {
+function applyGettersToDoc(schema, doc) {
   if (doc == null) {
     return;
   }
@@ -96,11 +85,11 @@ function applyGettersToDoc(schema, doc, fields, prefix) {
       if (currentDoc == null) continue;
       // If it is a nested array, apply getters to each subdocument (otherwise it would attempt to apply getters to the array itself)
       if (Array.isArray(currentDoc)) {
-        applyGettersToDoc.call(this, schema, currentDoc, fields, prefix);
+        applyGettersToDoc.call(this, schema, currentDoc);
         continue;
       }
       const schemaForDoc = getSchemaForDoc(schema, currentDoc);
-      applyGettersToDoc.call(this, schemaForDoc, currentDoc, fields, prefix);
+      applyGettersToDoc.call(this, schemaForDoc, currentDoc);
     }
     return;
   }
@@ -108,34 +97,34 @@ function applyGettersToDoc(schema, doc, fields, prefix) {
   const schemaForDoc = getSchemaForDoc(schema, doc);
 
   schemaForDoc.eachPath((path, schematype) => {
-    const pathWithPrefix = prefix ? prefix + '.' + path : path;
-    if (this.selectedInclusively() &&
-        fields &&
-        fields[pathWithPrefix] == null &&
-        !this.isPathSelectedInclusive(pathWithPrefix)) { // fields[pathWithPrefix] should return false
-      return;
-    }
-    if (this.selectedExclusively() &&
-        fields &&
-        fields[pathWithPrefix] != null &&
-        !this.isPathSelectedInclusive(pathWithPrefix)) {
+    if (!mpath.has(path, doc)) {
+      // The path is not present (likely from projection)
       return;
     }
 
-    const pathExists = mpath.has(path, doc);
-    if (pathExists) {
-      if (schematype.$isMongooseArray && !schematype.$isMongooseDocumentArray) {
-        mpath.set(
-          path,
-          schematype.applyGetters(mpath.get(path, doc), doc, true).map(subdoc => {
-            return schematype.caster.applyGetters(subdoc, doc);
-          }),
-          doc
-        );
-      } else {
-        mpath.set(path, schematype.applyGetters(mpath.get(path, doc), doc, true), doc);
+    const pathVal = mpath.get(path, doc);
+    if (schematype.$isMongooseArray) {
+      if (schematype.$isMongooseDocumentArray) {
+        pathVal.forEach((subdoc) => applyGettersToDoc.call(this, schematype.schema, subdoc));
+        return;
       }
+
+      mpath.set(
+        path,
+        schematype.applyGetters(pathVal, doc, true).map(subdoc => {
+          return schematype.caster.applyGetters(subdoc, doc);
+        }),
+        doc
+      );
+      return;
     }
+
+    if (schematype.$isSingleNested) {
+      applyGettersToDoc.call(this, schematype.schema, pathVal);
+      return;
+    }
+
+    mpath.set(path, schematype.applyGetters(pathVal, doc, true), doc);
   });
 }
 

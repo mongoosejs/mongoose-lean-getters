@@ -13,7 +13,7 @@ describe('mongoose-lean-getters', function() {
   after(() => mongoose.disconnect());
 
   it('with different types', async function() {
-    const schema = mongoose.Schema({
+    const schema = new mongoose.Schema({
       name: {
         type: String,
         get: v => v != null ? v.toLowerCase() : v
@@ -46,7 +46,7 @@ describe('mongoose-lean-getters', function() {
   });
 
   it('only calls getters once with find() (gh-1)', async function() {
-    const schema = mongoose.Schema({
+    const schema = new mongoose.Schema({
       name: {
         type: String,
         get: v => v + '123'
@@ -65,14 +65,14 @@ describe('mongoose-lean-getters', function() {
   });
 
   it('avoids running getters on fields that are projected out (gh-9)', async function() {
-    const childSchema = mongoose.Schema({
+    const childSchema = new mongoose.Schema({
       name: {
         type: String,
         get: v => v + '456'
       }
     });
 
-    const schema = mongoose.Schema({
+    const schema = new mongoose.Schema({
       name: {
         type: String,
         get: v => v + '123'
@@ -98,14 +98,14 @@ describe('mongoose-lean-getters', function() {
   });
 
   it('should call nested getters', async function() {
-    const subChildSchema = mongoose.Schema({
+    const subChildSchema = new mongoose.Schema({
       name: {
         type: String,
         get: v => v + ' nested child'
       }
     });
 
-    const childSchema = mongoose.Schema({
+    const childSchema = new mongoose.Schema({
       name: {
         type: String,
         get: v => v + ' child'
@@ -113,7 +113,7 @@ describe('mongoose-lean-getters', function() {
       subChilren: [subChildSchema]
     });
 
-    const schema = mongoose.Schema({
+    const schema = new mongoose.Schema({
       name: {
         type: String,
         get: v => v + ' root'
@@ -193,12 +193,13 @@ describe('mongoose-lean-getters', function() {
   });
 
   it('should work with arrays gh-22', async function() {
-    const schema = mongoose.Schema({
+    const schema = new mongoose.Schema({
       name: {
         type: String
       },
       items: [{
-        text: { type: String, default: null, get: v => v.slice(-6) }
+        text: { type: String, default: null, get: v => v.slice(-6) },
+        num: Number,
       }]
     });
 
@@ -215,18 +216,21 @@ describe('mongoose-lean-getters', function() {
     }, {
       $push: {
         items: {
-          text: 'Lorem ipsum dolor sit amet'
+          text: 'Lorem ipsum dolor sit amet',
+          num: 1234,
         }
       }
-    }, { new: true, projection: 'name items'}).lean({ getters: true });
+    }, { new: true, projection: 'name items.text'}).lean({ getters: true });
 
     const success = await Test.findOneAndUpdate({
       name: 'Captain Jean-Luc Picard'
     }).lean({ getters: true });
 
     await Test.deleteMany({});
-    assert.equal(success.items[0].text, 't amet');
-    assert.equal(res.items[0].text, 't amet');
+    assert.equal(success.items[0].text, 't amet', 'Success text is wrong');
+    assert.equal(success.items[0].num, 1234);
+    assert.equal(res.items[0].text, 't amet', 'Projected result is wrong');
+    assert.equal(res.items[0].num, undefined, 'num should be undefined');
   });
 
   it('should call getters on schemas with discriminator', async function() {
@@ -383,5 +387,43 @@ describe('mongoose-lean-getters', function() {
     const doc = await Test.findOneAndReplace({ _id: entry._id }, entry).lean({ getters: true });
     assert.equal(typeof doc.field, 'string');
     assert.strictEqual(doc.field, '1337');
+  });
+
+  it('should call getters on nested schemas within discriminated models', async() => {
+    const nestedSchema = new mongoose.Schema({
+      num: {
+        type: mongoose.Types.Decimal128,
+        get: (val) => `${val}`
+      }
+    });
+
+    const rootSchema = new mongoose.Schema({
+      // These properties are here as a control (these always worked as expected)
+      rootProp: { type: nestedSchema },
+      rootArray: { type: [nestedSchema] },
+    });
+    rootSchema.plugin(mongooseLeanGetters);
+
+    const discriminatedSchema = new mongoose.Schema({
+      // These props on the discriminated schemas were not having getters called
+      discriminatedProp: { type: nestedSchema },
+      discriminatedArray: { type: [nestedSchema] },
+    });
+
+    const RootModel = mongoose.model('Root', rootSchema);
+    const DiscriminatedModel = RootModel.discriminator('Discriminated', discriminatedSchema);
+
+    const entry = await DiscriminatedModel.create({
+      rootProp: { num: -0.1111111111111111111 },
+      rootArray: [{ num: -0.1111111111111111111 }],
+      discriminatedProp: { num: -0.222222222222222222 },
+      discriminatedArray: [{ num: -0.333333333333333333 }],
+    });
+
+    const found = await DiscriminatedModel.findById(entry._id).lean({ getters: true }).exec();
+    assert.equal(typeof found.rootProp.num, 'string', 'Root prop is not a string');
+    assert.equal(typeof found.rootArray[0].num, 'string', 'Root array is not a string');
+    assert.equal(typeof found.discriminatedProp.num, 'string', 'Discriminated prop is not a string');
+    assert.equal(typeof found.discriminatedArray[0].num, 'string', 'Discriminated array is not a string');
   });
 });
