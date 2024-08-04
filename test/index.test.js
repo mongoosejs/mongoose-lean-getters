@@ -400,4 +400,18 @@ describe('mongoose-lean-getters', function() {
     assert.equal(typeof doc.field, 'string');
     assert.strictEqual(doc.field, '1337');
   });
+
+  it('should allow non-discriminated documents to be retrieved (#39)', async() => {
+    const baseSchema = new mongoose.Schema({ foo: String });
+    baseSchema.plugin(mongooseLeanGetters);
+
+    const BaseModel = mongoose.model('BaseModel-gh-39', baseSchema);
+    BaseModel.discriminator('Custom', new mongoose.Schema({}));
+
+    // Simply retrieving the non-discriminated document causes the error
+    await assert.doesNotReject(async() => {
+      const entry = await BaseModel.create({ foo: 'foo' });
+      await BaseModel.findById(entry._id).lean({ getters: true });
+    });
+  });
 });
