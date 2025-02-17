@@ -85,7 +85,9 @@ function getSchemaForDoc(schema, res) {
       break;
     }
   }
-  return childSchema;
+
+  // If no discriminator schema found, return the root schema (#39)
+  return childSchema || schema;
 }
 
 function applyGettersToDoc(schema, doc, fields, prefix) {
@@ -128,16 +130,17 @@ function applyGettersToDoc(schema, doc, fields, prefix) {
 
     const pathExists = mpath.has(path, doc);
     if (pathExists) {
-      if (schematype.$isMongooseArray && !schematype.$isMongooseDocumentArray) {
+      const val = schematype.applyGetters(mpath.get(path, doc), doc, true);
+      if (val && schematype.$isMongooseArray && !schematype.$isMongooseDocumentArray) {
         mpath.set(
           path,
-          schematype.applyGetters(mpath.get(path, doc), doc, true).map(subdoc => {
+          val.map(subdoc => {
             return schematype.caster.applyGetters(subdoc, doc);
           }),
           doc
         );
       } else {
-        mpath.set(path, schematype.applyGetters(mpath.get(path, doc), doc, true), doc);
+        mpath.set(path, val, doc);
       }
     }
   });

@@ -45,6 +45,22 @@ describe('mongoose-lean-getters', function() {
     assert.equal(doc.arr[0].test, 'baz');
   });
 
+  it('with nulled array', async function() {
+    const schema = mongoose.Schema({
+      arr: [String]
+    });
+    schema.plugin(mongooseLeanGetters);
+
+    const Model = mongoose.model('withNulledArray', schema);
+
+    await Model.deleteMany({});
+    await Model.create({ arr: null });
+
+    const doc = await Model.findOne().lean({ getters: true });
+
+    assert.equal(doc.arr, null);
+  });
+
   it('only calls getters once with find() (gh-1)', async function() {
     const schema = mongoose.Schema({
       name: {
@@ -401,5 +417,19 @@ describe('mongoose-lean-getters', function() {
 
     const doc2 = await TestModel.findById(entry._id).lean({ getters: false });
     assert.equal(doc2.field, 'value');
+  });
+
+  it('should allow non-discriminated documents to be retrieved (#39)', async() => {
+    const baseSchema = new mongoose.Schema({ foo: String });
+    baseSchema.plugin(mongooseLeanGetters);
+
+    const BaseModel = mongoose.model('BaseModel-gh-39', baseSchema);
+    BaseModel.discriminator('Custom', new mongoose.Schema({}));
+
+    // Simply retrieving the non-discriminated document causes the error
+    await assert.doesNotReject(async() => {
+      const entry = await BaseModel.create({ foo: 'foo' });
+      await BaseModel.findById(entry._id).lean({ getters: true });
+    });
   });
 });
