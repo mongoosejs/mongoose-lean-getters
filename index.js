@@ -43,7 +43,7 @@ function applyGetters(schema, res, path) {
     return;
   }
   const { defaultLeanOptions } = this._mongooseLeanGettersOptions;
-  const shouldCallGetters = this._mongooseOptions?.lean?.getters ?? defaultOptions?.getters ?? false;
+  const shouldCallGetters = this._mongooseOptions?.lean?.getters ?? defaultLeanOptions?.getters ?? false;
 
   if (shouldCallGetters) {
     if (Array.isArray(res)) {
