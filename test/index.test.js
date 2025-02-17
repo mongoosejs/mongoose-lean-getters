@@ -401,6 +401,24 @@ describe('mongoose-lean-getters', function() {
     assert.strictEqual(doc.field, '1337');
   });
 
+  it('allows defaultLeanOptions to be set and overridden at call time (#33)', async() => {
+    const testSchema = new mongoose.Schema({
+      field: {
+        type: String,
+        get(val) { return `${val}-suffix`; },
+      }
+    });
+    testSchema.plugin(mongooseLeanGetters, { defaultLeanOptions: { getters: true } });
+
+    const TestModel = mongoose.model('gh-33', testSchema);
+    const entry = await TestModel.create({ field: 'value' });
+    const doc1 = await TestModel.findById(entry._id).lean();
+    assert.equal(doc1.field, 'value-suffix');
+
+    const doc2 = await TestModel.findById(entry._id).lean({ getters: false });
+    assert.equal(doc2.field, 'value');
+  });
+
   it('should allow non-discriminated documents to be retrieved (#39)', async() => {
     const baseSchema = new mongoose.Schema({ foo: String });
     baseSchema.plugin(mongooseLeanGetters);
