@@ -43,11 +43,7 @@ function applyGetters(schema, res, path) {
     return;
   }
   const { defaultLeanOptions } = this._mongooseLeanGettersOptions;
-  const shouldCallGetters = this._mongooseOptions.lean && (
-    this._mongooseOptions.lean.getters ||
-    // Allow the default options to be overridden with `.lean({ getters: false })`
-    (defaultLeanOptions && defaultLeanOptions.getters && this._mongooseOptions.lean.getters !== false)
-  );
+  const shouldCallGetters = this._mongooseOptions?.lean?.getters ?? defaultOptions?.getters ?? false;
 
   if (shouldCallGetters) {
     if (Array.isArray(res)) {
