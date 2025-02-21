@@ -1,3 +1,9 @@
+2.2.0 / 2025-02-21
+==================
+ * feat: allow default lean options plugin config #41 [DesignByOnyx](https://github.com/DesignByOnyx)
+ * fix: allow nested schemas on discriminated models to work #43 [DesignByOnyx](https://github.com/DesignByOnyx)
+ * fix: allow array getters to return non-arrays fix #38 #37 [DesignByOnyx](https://github.com/DesignByOnyx)
+
 2.1.1 / 2024-08-04
 ==================
  * fix: allow non-discriminated documents be retrieved #40 [DesignByOnyx](https://github.com/DesignByOnyx)
