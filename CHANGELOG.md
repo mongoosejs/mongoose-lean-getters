@@ -1,3 +1,8 @@
+2.1.1 / 2024-08-04
+==================
+ * fix: allow non-discriminated documents be retrieved #40 [DesignByOnyx](https://github.com/DesignByOnyx)
+ * fix: don't throw error if array contains null #36 [Sebmaster](https://github.com/Sebmaster)
+
 2.1.0 / 2024-04-27
 ==================
  * feat: add support for findOneAndReplace #34 [Ebulus7899](https://github.com/Ebulus7899)
