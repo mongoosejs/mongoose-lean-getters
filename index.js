@@ -107,23 +107,6 @@ function applyGettersToDoc(schema, doc) {
       // The path is not present (likely from projection)
       return;
     }
-
-    const pathVal = mpath.get(path, doc);
-    if (schematype.$isMongooseArray) {
-      if (schematype.$isMongooseDocumentArray) {
-        pathVal.forEach((subdoc) => applyGettersToDoc.call(this, schematype.schema, subdoc));
-        return;
-      }
-
-      mpath.set(
-        path,
-        schematype.applyGetters(pathVal, doc, true).map(subdoc => {
-          return schematype.caster.applyGetters(subdoc, doc);
-        }),
-        doc
-      );
-      return;
-    }
     
     const pathExists = mpath.has(path, doc);
     if (pathExists) {
