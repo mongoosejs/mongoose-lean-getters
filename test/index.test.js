@@ -473,4 +473,57 @@ describe('mongoose-lean-getters', function() {
       await BaseModel.findById(entry._id).lean({ getters: true });
     });
   });
+
+  it('handles getters on primitive arrays', async function() {
+    const schema = new mongoose.Schema({
+      integers: {
+        type: [Number],
+        get: v => Array.isArray(v) ? v.map(i => Math.round(i)) : v
+      }
+    });
+    schema.plugin(mongooseLeanGetters);
+
+    const Model = mongoose.model('primitiveArrayGetters', schema);
+
+    await Model.deleteMany({});
+    await Model.create({ integers: [1.1, 2.2, 3.3] });
+
+    const doc = await Model.findOne().lean({ getters: true });
+
+    assert.deepStrictEqual(doc.integers, [1, 2, 3]);
+  });
+
+  it('should should allow array getters to return non-arrays', async function() {
+    const userSchema = new mongoose.Schema({
+      emails: {
+        type: [String],
+        // returns undefined, string, or array
+        get: (val) => !val || !val.length ? undefined : (val.length === 1 ? val[0] : val),
+        set: (val) => typeof val === 'string' ? [val] : val,
+      }
+    });
+    userSchema.plugin(mongooseLeanGetters);
+    const User = mongoose.model('gh-37-transform-arrays', userSchema);
+
+    const variants = [
+      { sourceVal: 'foo', expectedVal: 'foo' },
+      { sourceVal: ['foo'], expectedVal: 'foo' },
+      { sourceVal: ['foo', 'bar'], expectedVal: ['foo', 'bar'] },
+      { sourceVal: [], expectedVal: undefined },
+      { sourceVal: null, expectedVal: undefined },
+      { sourceVal: undefined, expectedVal: undefined },
+    ];
+
+    await Promise.all(
+      variants.map(async({ sourceVal, expectedVal }) => {
+        const user = new User({ emails: sourceVal });
+        await user.save();
+
+        const foundUser = await User.findById(user._id).lean({ getters: true });
+        const stringified = JSON.stringify({ sourceVal, expectedVal });
+        assert.deepStrictEqual(user.emails, expectedVal, `user did not have expected value ${stringified}`);
+        assert.deepStrictEqual(foundUser.emails, expectedVal, `foundUser did not have expected value ${stringified}`);
+      })
+    );
+  });
 });

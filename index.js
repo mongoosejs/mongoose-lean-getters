@@ -109,7 +109,7 @@ function applyGettersToDoc(schema, doc) {
     }
 
     const val = schematype.applyGetters(mpath.get(path, doc), doc, true);
-    if (val && schematype.$isMongooseArray) {
+    if (Array.isArray(val) && schematype.$isMongooseArray) {
       if (schematype.$isMongooseDocumentArray) {
         val.forEach((subdoc) => applyGettersToDoc.call(this, schematype.schema, subdoc));
       } else {
