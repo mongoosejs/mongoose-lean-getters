@@ -32,7 +32,7 @@
     "acquit-ignore": "0.1.0",
     "acquit-markdown": "0.1.0",
     "co": "4.6.0",
-    "eslint": "5.16.0",
+    "eslint": "8.x",
     "istanbul": "0.4.5",
     "mocha": "5.2.x"
   },
@@ -47,7 +47,7 @@
       "eslint:recommended"
     ],
     "parserOptions": {
-      "ecmaVersion": 2018
+      "ecmaVersion": 2020
     },
     "env": {
       "node": true,

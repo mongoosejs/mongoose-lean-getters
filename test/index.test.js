@@ -430,10 +430,10 @@ describe('mongoose-lean-getters', function() {
     const DiscriminatedModel = RootModel.discriminator('Discriminated', discriminatedSchema);
 
     const entry = await DiscriminatedModel.create({
-      rootProp: { num: -0.1111111111111111111 },
-      rootArray: [{ num: -0.1111111111111111111 }],
-      discriminatedProp: { num: -0.222222222222222222 },
-      discriminatedArray: [{ num: -0.333333333333333333 }],
+      rootProp: { num: -0.1111 },
+      rootArray: [{ num: -0.1111 }],
+      discriminatedProp: { num: -0.2222 },
+      discriminatedArray: [{ num: -0.3333 }],
     });
 
     const found = await DiscriminatedModel.findById(entry._id).lean({ getters: true }).exec();

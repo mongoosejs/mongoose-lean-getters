@@ -107,26 +107,21 @@ function applyGettersToDoc(schema, doc) {
       // The path is not present (likely from projection)
       return;
     }
-    
-    const pathExists = mpath.has(path, doc);
-    if (pathExists) {
-      const val = schematype.applyGetters(mpath.get(path, doc), doc, true);
-      if (val && schematype.$isMongooseArray && !schematype.$isMongooseDocumentArray) {
-        mpath.set(
-          path,
-          val.map(subdoc => {
-            return schematype.caster.applyGetters(subdoc, doc);
-          }),
-          doc
-        );
-      } if (val && schematype.$isSingleNested) {
-        applyGettersToDoc.call(this, schematype.schema, pathVal);
-      } else {
-        mpath.set(path, val, doc);
-      }
-    }
 
-    mpath.set(path, schematype.applyGetters(pathVal, doc, true), doc);
+    const val = schematype.applyGetters(mpath.get(path, doc), doc, true);
+    if (val && schematype.$isMongooseArray) {
+      if (schematype.$isMongooseDocumentArray) {
+        val.forEach((subdoc) => applyGettersToDoc.call(this, schematype.schema, subdoc));
+      } else {
+        for (let i = 0; i < val.length; ++i) {
+          val[i] = schematype.caster.applyGetters(val[i], doc);
+        }
+      }
+    } if (val && schematype.$isSingleNested) {
+      applyGettersToDoc.call(this, schematype.schema, val);
+    } else {
+      mpath.set(path, val, doc);
+    }
   });
 }
 
