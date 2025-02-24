@@ -526,4 +526,28 @@ describe('mongoose-lean-getters', function() {
       })
     );
   });
+
+  it('handles single nested getter that returns primitive (gh-42)', async function() {
+    const AccountSchema = new mongoose.Schema({
+      name: {
+        _id: false,
+        type: {
+          first: { type: String, required: true },
+          last: { type: String, required: true },
+        },
+        get: function(v) {
+          return v.first + v.last;
+        },
+      },
+    });
+    AccountSchema.plugin(mongooseLeanGetters);
+    const Account = mongoose.model('gh-42-subdoc-getter', AccountSchema);
+    const { _id } = await Account.create({
+      name: { first: 'Hamo', last: 'Boker' },
+    });
+    const account = await Account.findById(_id).lean({
+      getters: true,
+    });
+    assert.strictEqual(account.name, 'HamoBoker');
+  });
 });

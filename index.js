@@ -117,7 +117,7 @@ function applyGettersToDoc(schema, doc) {
           val[i] = schematype.caster.applyGetters(val[i], doc);
         }
       }
-    } if (val && schematype.$isSingleNested) {
+    } if (val && typeof val === 'object' && schematype.$isSingleNested) {
       applyGettersToDoc.call(this, schematype.schema, val);
     } else {
       mpath.set(path, val, doc);
