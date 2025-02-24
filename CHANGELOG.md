@@ -1,3 +1,7 @@
+2.2.1 / 2025-02-24
+==================
+ * fix: handle getter for single nested that returns non-object #42
+
 2.2.0 / 2025-02-21
 ==================
  * feat: allow default lean options plugin config #41 [DesignByOnyx](https://github.com/DesignByOnyx)
