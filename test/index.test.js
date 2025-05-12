@@ -550,4 +550,31 @@ describe('mongoose-lean-getters', function() {
     });
     assert.strictEqual(account.name, 'HamoBoker');
   });
+
+  it('applies single nested subdoc getters (gh-45)', async function() {
+    const priceSchema = new mongoose.Schema(
+      {
+        amount: mongoose.Schema.Types.Decimal128,
+        currency: String,
+      },
+      { _id: false }
+    );
+
+    const itemSchema = new mongoose.Schema({
+      name: String,
+      price: {
+        type: priceSchema,
+        get: v => ({ value: parseFloat(v.amount.toString()), unit: v.currency })
+      },
+    });
+    itemSchema.plugin(mongooseLeanGetters);
+    const Item = mongoose.model('gh-45-single-nested-getters', itemSchema);
+    await Item.create({
+      name: 'Test Product',
+      price: { amount: 123.45, currency: 'USD' },
+    });
+
+    const lean = await Item.findOne().lean({ getters: true });
+    assert.deepStrictEqual(lean.price, { value: 123.45, unit: 'USD' });
+  });
 });
