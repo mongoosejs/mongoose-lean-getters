@@ -1,3 +1,8 @@
+2.2.2 / 2025-05-12
+==================
+ * fix: don't apply getters if defaultLeanOptions is set but lean is false #48 #46
+ * fix: apply single nested subdoc getter results #47 #45
+
 2.2.1 / 2025-02-24
 ==================
  * fix: handle getter for single nested that returns non-object #42
