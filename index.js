@@ -42,6 +42,8 @@ function applyGetters(schema, res) {
   if (res == null) {
     return;
   }
+  // Skip applying getters if the `lean` option is false.
+  // This ensures that Mongoose getters are not applied to non-lean queries.
   if (!this._mongooseOptions?.lean) {
     return;
   }
