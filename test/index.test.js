@@ -442,7 +442,8 @@ describe('mongoose-lean-getters', function() {
     assert.equal(typeof found.discriminatedProp.num, 'string', 'Discriminated prop is not a string');
     assert.equal(typeof found.discriminatedArray[0].num, 'string', 'Discriminated array is not a string');
   });
-  it('allows defaultLeanOptions to be set and overridden at call time (#33)', async() => {
+
+  it('allows defaultLeanOptions to be set and overridden at call time (#33) (#46)', async() => {
     const testSchema = new mongoose.Schema({
       field: {
         type: String,
@@ -458,6 +459,10 @@ describe('mongoose-lean-getters', function() {
 
     const doc2 = await TestModel.findById(entry._id).lean({ getters: false });
     assert.equal(doc2.field, 'value');
+
+    const doc3 = await TestModel.findById(entry._id);
+    assert.equal(doc3.field, 'value-suffix');
+    assert.equal(doc3.get('field', null, { getters: false }), 'value');
   });
 
   it('should allow non-discriminated documents to be retrieved (#39)', async() => {
