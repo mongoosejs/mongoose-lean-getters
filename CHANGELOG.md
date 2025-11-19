@@ -1,3 +1,7 @@
+2.3.0 / 2025-11-18
+==================
+ * feat: support mongoose 9
+
 2.2.2 / 2025-05-12
 ==================
  * fix: don't apply getters if defaultLeanOptions is set but lean is false #48 #46
