@@ -119,7 +119,8 @@ function applyGettersToDoc(schema, doc) {
         val.forEach((subdoc) => applyGettersToDoc.call(this, schematype.schema, subdoc));
       } else {
         for (let i = 0; i < val.length; ++i) {
-          val[i] = schematype.caster.applyGetters(val[i], doc);
+          const embeddedSchemaType = schematype.embeddedSchemaType ?? schematype.caster;
+          val[i] = embeddedSchemaType.applyGetters(val[i], doc);
         }
       }
     } else if (val && typeof val === 'object' && schematype.$isSingleNested) {
