@@ -1,3 +1,7 @@
+2.3.1 / 2025-12-21
+==================
+ * fix: correct way to get embedded schema type for arrays of primitives in Mongoose 9 #49
+
 2.3.0 / 2025-11-18
 ==================
  * feat: support mongoose 9
